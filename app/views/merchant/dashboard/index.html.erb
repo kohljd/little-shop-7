@@ -12,7 +12,7 @@
       <% @merchant.top_five_customers.each do |customer|%>
         <div id="customers-<%= customer.id%>" class id="five-customers">
           <ol>
-            <b>Customer Name: </b><%= customer.full_name %> Successful Transactions: <%= customer.successful_transactions%>
+            <li>Customer Name: </b><%= customer.full_name %> Successful Transactions: <%= customer.successful_transactions%>
           </ol>
         </div>
       <% end %>
