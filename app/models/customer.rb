@@ -7,8 +7,8 @@ class Customer < ApplicationRecord
   
   def self.top_customers 
     where("transactions.result = 0")
-      .joins(invoices: :transactions)
-      .group(:first_name, :last_name, :id, :result)
+      .joins(:transactions)
+      .group(:id)
       .order("count(transactions.result) DESC")
       .limit(5)
   end
