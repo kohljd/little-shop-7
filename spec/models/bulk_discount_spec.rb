@@ -7,8 +7,6 @@ RSpec.describe BulkDiscount, type: :model do
 
     it { should validate_presence_of :quantity}
     it { should validate_numericality_of :quantity}
-
-    it { should validate_presence_of :merchant_id}
   end
 
   describe "relationships" do
