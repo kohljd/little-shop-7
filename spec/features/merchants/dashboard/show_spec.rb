@@ -33,7 +33,6 @@ RSpec.describe "Merchant Dashboard" do
     create(:invoice_item, status: 0, invoice_id: @invoice_4.id, item_id: @item_4.id) #pending
     create(:invoice_item, status: 0, invoice_id: @invoice_5.id, item_id: @item_1.id) #pending
 
-    # visit "/merchants/#{@merchant_1.id}/dashboard"
     visit merchant_dashboard_path(@merchant_1)
   end
 

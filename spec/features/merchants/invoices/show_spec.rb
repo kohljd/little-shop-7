@@ -54,14 +54,14 @@ RSpec.describe 'Merchant Invoices Show Page', type: :feature do
           expect(page).to have_content("book")
           expect(page).to have_content("1")
           expect(page).to have_content("$25.00")
-          expect(page).to have_content("Pending")
+          expect(page).to have_content("pending")
         end
 
         within "#invoice_item-#{@invoice_item_2.id}" do
           expect(page).to have_content("belt")
           expect(page).to have_content("2")
           expect(page).to have_content("$10.00")
-          expect(page).to have_content("Packaged")
+          expect(page).to have_content("packaged")
         end
 
         visit merchant_invoice_path(@merchant_2, @invoice_2)
@@ -70,7 +70,7 @@ RSpec.describe 'Merchant Invoices Show Page', type: :feature do
           expect(page).to have_content("soda")
           expect(page).to have_content("2")
           expect(page).to have_content("$10.00")
-          expect(page).to have_content("Packaged")
+          expect(page).to have_content("packaged")
         end
       end
     end
@@ -88,35 +88,35 @@ RSpec.describe 'Merchant Invoices Show Page', type: :feature do
     describe "User Story 18 - Update Item Status" do
       it "displays a select field with current status selected for Items" do
         within "#invoice_item-#{@invoice_item_1.id}" do
-          expect(page).to have_select("Status", with_options: ["Pending", "Packaged", "Shipped"])
-          expect(page.find_field("Status").value).to eq("Pending")
+          expect(page).to have_select("Status", with_options: ["pending", "packaged", "shipped"])
+          expect(page.find_field("Status").value).to eq("pending")
         end
 
         within "#invoice_item-#{@invoice_item_2.id}" do
-          expect(page).to have_select("Status", with_options: ["Pending", "Packaged", "Shipped"])
-          expect(page.find_field("Status").value).to eq("Packaged")
+          expect(page).to have_select("Status", with_options: ["pending", "packaged", "shipped"])
+          expect(page.find_field("Status").value).to eq("packaged")
         end
       end
 
       it "updates each Item's status when I click Submit" do
         within "#invoice_item-#{@invoice_item_1.id}" do
-          expect(page.find_field("Status").value).to_not eq("Shipped")
+          expect(page.find_field("Status").value).to_not eq("shipped")
 
-          select "Shipped", from: "Status"
+          select "shipped", from: "Status"
           click_button
 
           expect(page.current_path).to eq(merchant_invoice_path(@merchant_1.id, @invoice_1))
-          expect(page.find_field("Status").value).to eq("Shipped")
+          expect(page.find_field("Status").value).to eq("shipped")
         end
 
         within "#invoice_item-#{@invoice_item_2.id}" do
-          expect(page.find_field("Status").value).to_not eq("Pending")
+          expect(page.find_field("Status").value).to_not eq("pending")
 
-          select "Pending", from: "Status"
+          select "pending", from: "Status"
           click_button
 
           expect(page.current_path).to eq(merchant_invoice_path(@merchant_1.id, @invoice_1))
-          expect(page.find_field("Status").value).to eq("Pending")
+          expect(page.find_field("Status").value).to eq("pending")
         end
       end
     end

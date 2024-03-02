@@ -44,21 +44,21 @@ RSpec.describe "Admin Invoices Show", type: :feature do
           expect(page).to have_content("shoes")
           expect(page).to have_content("1")
           expect(page).to have_content("$25.00")
-          expect(page).to have_content("Pending")
+          expect(page).to have_content("pending")
         end
 
         within "#invoice_item-#{@invoice_item_2.id}" do
           expect(page).to have_content("book")
           expect(page).to have_content("2")
           expect(page).to have_content("$10.00")
-          expect(page).to have_content("Packaged")
+          expect(page).to have_content("packaged")
         end
 
         within "#invoice_item-#{@invoice_item_3.id}" do
           expect(page).to have_content("lamp")
           expect(page).to have_content("3")
           expect(page).to have_content("$50.00")
-          expect(page).to have_content("Shipped")
+          expect(page).to have_content("shipped")
         end
       end
     end

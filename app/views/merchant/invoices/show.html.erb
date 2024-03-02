@@ -23,7 +23,7 @@
                       method: :patch,
                       data: { turbo: false } do |f| %>
           <%= f.label :status %>
-          <%= f.select :status, ["Pending", "Packaged", "Shipped"], selected: invoice_item.status %>
+          <%= f.select :status, ["pending", "packaged", "shipped"], selected: invoice_item.status %>
           <%= f.submit "Submit" %>
         <% end %>
       </td>
