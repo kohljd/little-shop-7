@@ -4,7 +4,7 @@ RSpec.describe "Merchant's Bulk Discounts Index", type: :feature do
   describe "when merchant visits" do
     let!(:merchant_1) {create(:merchant)}
     let!(:bulk_discount_1) {merchant_1.bulk_discounts.create!(discount: 20, quantity: 10)}
-    let!(:bulk_discount_2) {merchant_1.bulk_discounts.create!(discount: 10, quantity: 15)}
+    let!(:bulk_discount_2) {merchant_1.bulk_discounts.create!(discount: 15, quantity: 15)}
 
     before do
         visit merchant_bulk_discounts_path(merchant_1)
@@ -41,7 +41,7 @@ RSpec.describe "Merchant's Bulk Discounts Index", type: :feature do
         within "#bulk_discount-#{bulk_discount_1.id}" do
           expect(page).to have_link("Bulk Discount #{bulk_discount_1.id}")
           click_on "Bulk Discount #{bulk_discount_1.id}"
-          expect(current_path).to eq(merchant_bulk_discount_path(bulk_discount_1))
+          expect(current_path).to eq(merchant_bulk_discount_path(merchant_1, bulk_discount_1))
         end
 
         visit merchant_bulk_discounts_path(merchant_1)
@@ -49,7 +49,7 @@ RSpec.describe "Merchant's Bulk Discounts Index", type: :feature do
         within "#bulk_discount-#{bulk_discount_2.id}" do
           expect(page).to have_link("Bulk Discount #{bulk_discount_2.id}")
           click_on "Bulk Discount #{bulk_discount_2.id}"
-          expect(current_path).to eq(merchant_bulk_discount_path(bulk_discount_2))
+          expect(current_path).to eq(merchant_bulk_discount_path(merchant_1, bulk_discount_2))
         end
       end
     end
