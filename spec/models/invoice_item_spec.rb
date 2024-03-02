@@ -35,5 +35,3 @@ RSpec.describe InvoiceItem, type: :model do
     end
   end
 end
-
-rf
