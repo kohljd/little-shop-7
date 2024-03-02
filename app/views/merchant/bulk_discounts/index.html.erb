@@ -1,0 +1,7 @@
+<h1>Bulk Discounts</h1>
+
+<% @bulk_discounts.each do |bulk_discount| %>
+  <div id="bulk_discount-<%=bulk_discount.id%>">
+    <p><%= link_to "Bulk Discount #{bulk_discount.id}", merchant_bulk_discount_path(@merchant, bulk_discount) %> is <%= bulk_discount.discount %>% off <%= bulk_discount.quantity %> items</p>
+  </div>
+<% end %>

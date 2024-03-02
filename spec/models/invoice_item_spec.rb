@@ -9,7 +9,7 @@ RSpec.describe InvoiceItem, type: :model do
     it { should validate_numericality_of :unit_price}
     
     it { should validate_presence_of :status}
-    it { should define_enum_for(:status).with_values("Pending" => 0, "Packaged" => 1, "Shipped" => 2)}
+    it { should define_enum_for(:status).with_values(pending: 0, packaged: 1, shipped: 2)}
   end
   
   describe "relationships" do
