@@ -11,7 +11,7 @@ Rails.application.routes.draw do
     resources :items, except: [:destroy], via: [:patch]
     resources :invoices, only: [:index, :show]
     resources :invoice_items, only: [:update], via: [:patch]
-    resources :bulk_discounts, only: [:index]
+    resources :bulk_discounts, only: [:index, :show]
   end
 
   resources :admin, only: [:index], controller: "admin_dashboard"
