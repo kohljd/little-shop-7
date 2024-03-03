@@ -5,6 +5,8 @@
   <%= link_to "#{@merchant.name}'s Invoices", merchant_invoices_path, data: { turbo_method: :get } %>
   </div>
 
+  <%= link_to "all my discounts", bulk_discounts_path %>
+
 <div class="columns">
   <div class="column">
     <section id="top-five-customers" class="merchant-top-five-customers">
