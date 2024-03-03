@@ -29,8 +29,8 @@ RSpec.describe "Merchant Bulk Discount Edit", type: :feature do
 
       fill_in "Quantity", with: 22
       click_on "Submit"
+      
       expect(current_path).to eq(merchant_bulk_discount_path(merchant_1, bulk_discount_1))
-      save_and_open_page
       expect(page).to have_content("Quantity Threshold: 22 items")
     end
 
@@ -38,12 +38,22 @@ RSpec.describe "Merchant Bulk Discount Edit", type: :feature do
       fill_in "Discount", with: ''
       fill_in "Quantity", with: ''
       click_on "Submit"
-      
+
       expect(current_path).to eq(edit_merchant_bulk_discount_path(merchant_1, bulk_discount_1))
       expect(page).to have_content("Discount can't be blank")
       expect(page).to have_content("Discount is not a number")
       expect(page).to have_content("Quantity can't be blank")
       expect(page).to have_content("Quantity is not a number")
+    end
+
+    it "quantity and discount must be > 0" do
+      fill_in "Discount", with: 0
+      fill_in "Quantity", with: 0
+      click_on "Submit"
+
+      expect(current_path).to eq(edit_merchant_bulk_discount_path(merchant_1, bulk_discount_1))
+      expect(page).to have_content("Discount must be greater than 0")
+      expect(page).to have_content("Quantity must be greater than 0")
     end
   end
 end
