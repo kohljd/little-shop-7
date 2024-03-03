@@ -70,5 +70,25 @@ RSpec.describe "Merchant's Bulk Discounts Index", type: :feature do
         expect(current_path).to eq("/merchants/#{merchant_1.id}/bulk_discounts/new")
       end
     end
+
+    describe "displays option to delete bulk discounts" do
+      it "delete button next to each discount" do
+        within "#bulk_discount-#{bulk_discount_1.id}" do
+          expect(page).to have_button("Delete", count: 1)
+        end
+
+        within "#bulk_discount-#{bulk_discount_2.id}" do
+          expect(page).to have_button("Delete", count: 1)
+        end
+      end
+
+      it "clicking 'delete' reloads the page without the deleted item" do
+        click_on "Delete", match: :first
+
+        expect(current_path).to eq(merchant_bulk_discounts_path(merchant_1))
+        expect(page).to_not have_content("20% off 10 items")
+        expect(page).to have_no_link("Bulk Discount #{bulk_discount_1.id}", href: merchant_bulk_discount_path(merchant_1, bulk_discount_1))
+      end
+    end
   end
 end
