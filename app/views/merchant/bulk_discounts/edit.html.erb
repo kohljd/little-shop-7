@@ -1,0 +1,9 @@
+<h1>Edit Bulk Discount <%= @bulk_discount.id %> </h1>
+
+<%= form_with model: @bulk_discount, url: merchant_bulk_discount_path(@merchant, @bulk_discount), local: true, data: {turbo: false} do |form|%>
+  <%= form.label :discount %>
+  <%= form.text_field :discount %><br>
+  <%= form.label :quantity %>
+  <%= form.text_field :quantity %><br>
+  <%= form.submit "Submit" %>
+<% end %>
