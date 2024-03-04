@@ -120,5 +120,15 @@ RSpec.describe 'Merchant Invoices Show Page', type: :feature do
         end
       end
     end
+
+    describe "total revenue and discounted revenue" do
+      it "displays total revenue without discounts" do
+        expect(page).to have_content("Total Revenue: $105.00")
+      end
+
+      it "displays total discounted revenue" do
+        expect(page).to have_content("Total Discounted Revenue: #{AMOUNT HERE}")
+      end
+    end
   end
 end
