@@ -52,33 +52,117 @@ RSpec.describe Invoice, type: :model do
     end
   end
 
-  describe "instance_method" do
-    before do
-      @merchant_1 = create(:merchant)
+  describe "instance methods" do
+    let(:merchant_1) {create(:merchant)}
+    let(:merchant_2) {create(:merchant)}
 
-      @item_1 = create(:item)
-      @item_2 = create(:item)
-      @item_3 = create(:item)
+    let(:item_1) {create(:item, merchant: merchant_1)}
+    let(:item_2) {create(:item, merchant: merchant_1)}
+    let(:item_3) {create(:item, merchant: merchant_1)}
+    let(:item_4) {create(:item, merchant: merchant_2)}
+    let(:item_5) {create(:item, merchant: merchant_2)}
 
-      @customer_1 = create(:customer)
+    let(:customer_1) {create(:customer)}
 
-      @invoice_1 = @customer_1.invoices.create!(status: 1, created_at: "2015-12-09")
-      @invoice_2 = @customer_1.invoices.create!(status: 2, created_at: "2013-11-10")
+    let(:invoice_1) {customer_1.invoices.create!(status: 1, created_at: "2015-12-09")}
+    let(:invoice_2) {customer_1.invoices.create!(status: 2, created_at: "2013-11-10")}
+    
+    describe "#format_date_created" do
+      it "formats the created_at date" do
+        invoice_item_1 = InvoiceItem.create!(item_id: item_1.id, invoice_id: invoice_1.id, quantity: 1, unit_price: 2500, status: 0)
+        invoice_item_2 = InvoiceItem.create!(item_id: item_2.id, invoice_id: invoice_1.id, quantity: 2, unit_price: 1000, status: 1)
+        invoice_item_3 = InvoiceItem.create!(item_id: item_3.id, invoice_id: invoice_1.id, quantity: 3, unit_price: 5000, status: 2)
 
-      @invoice_item_1 = InvoiceItem.create!(item_id: @item_1.id, invoice_id: @invoice_1.id, quantity: 1, unit_price: 2500, status: 0)
-      @invoice_item_2 = InvoiceItem.create!(item_id: @item_2.id, invoice_id: @invoice_1.id, quantity: 2, unit_price: 1000, status: 1)
-      @invoice_item_3 = InvoiceItem.create!(item_id: @item_3.id, invoice_id: @invoice_1.id, quantity: 3, unit_price: 5000, status: 2)
+        expect(invoice_1.format_date_created).to eq("Wednesday, December 09, 2015")
+        expect(invoice_2.format_date_created).to eq("Sunday, November 10, 2013")
+      end
     end
 
-    describe "#format_date_created"
-      it "formats the created_at date" do
-        expect(@invoice_1.format_date_created).to eq("Wednesday, December 09, 2015")
-        expect(@invoice_2.format_date_created).to eq("Sunday, November 10, 2013")
-      end
-
     describe "#total_revenue" do
-      it "calculates an invoice's total revenue" do
-        expect(@invoice_1.total_revenue).to eq(19500)
+      describe "calculates an invoice's total revenue" do
+        describe "scenarios:" do
+          it "varying invoice_item statuses, 1 merchant" do
+            invoice_item_1 = InvoiceItem.create!(item: item_1, invoice: invoice_1, quantity: 1, unit_price: 2500, status: 0)
+            invoice_item_2 = InvoiceItem.create!(item: item_2, invoice: invoice_1, quantity: 2, unit_price: 1000, status: 1)
+            invoice_item_3 = InvoiceItem.create!(item: item_3, invoice: invoice_1, quantity: 3, unit_price: 5000, status: 2)
+
+            expect(invoice_1.total_revenue).to eq(19500)
+          end
+
+          it "2 merchants' items on invoice" do
+            invoice_item_1 = InvoiceItem.create!(item: item_1, invoice: invoice_1, quantity: 1, unit_price: 2500, status: 0)
+            invoice_item_2 = InvoiceItem.create!(item: item_5, invoice: invoice_1, quantity: 2, unit_price: 1000, status: 1)
+
+            expect(invoice_1.total_revenue).to eq(4500)
+          end
+        end
+      end
+    end
+
+    describe "#total_discounted_revenue" do
+      describe "it calculates an invoice's total discounted revenue" do
+        describe "scenarios:" do
+          let!(:bulk_discount_1) {merchant_1.bulk_discounts.create!(discount: 10, quantity: 20)}
+          let!(:bulk_discount_2) {merchant_1.bulk_discounts.create!(discount: 50, quantity: 30)}
+          let!(:bulk_discount_3) {merchant_2.bulk_discounts.create!(discount: 20, quantity: 15)}
+          let!(:bulk_discount_4) {merchant_2.bulk_discounts.create!(discount: 15, quantity: 15)}
+
+          it "no qualifying bulk discount" do
+            invoice_item_1 = InvoiceItem.create!(item: item_1, invoice: invoice_1, quantity: 10, unit_price: 1000, status: 0)
+            invoice_item_2 = InvoiceItem.create!(item: item_2, invoice: invoice_1, quantity: 10, unit_price: 1000, status: 0)
+
+            expect(invoice_1.total_discounted_revenue).to eq(20000)
+          end
+
+          it "1 item qualifies for a bulk discount" do
+            invoice_item_1 = InvoiceItem.create!(item: item_1, invoice: invoice_1, quantity: 20, unit_price: 1000, status: 0)  # 10% off
+            invoice_item_2 = InvoiceItem.create!(item: item_2, invoice: invoice_1, quantity: 10, unit_price: 1000, status: 0)
+
+            expect(invoice_1.total_discounted_revenue).to eq(28000)
+          end
+
+          it "applies the better of merchant's two discounts - 1 item meets 2 discounts' criteria" do
+            invoice_item_1 = InvoiceItem.create!(item: item_1, invoice: invoice_1, quantity: 30, unit_price: 1000, status: 0) # meet 10% & 50% off
+            invoice_item_2 = InvoiceItem.create!(item: item_2, invoice: invoice_1, quantity: 10, unit_price: 1000, status: 0)
+
+            expect(invoice_1.total_discounted_revenue).to eq(25000)
+          end
+
+          it "each item meets criteria for separate discounts" do
+            invoice_item_1 = InvoiceItem.create!(item: item_1, invoice: invoice_1, quantity: 30, unit_price: 1000, status: 0)  # 50% off
+            invoice_item_2 = InvoiceItem.create!(item: item_2, invoice: invoice_1, quantity: 20, unit_price: 1000, status: 0) # 10% off
+
+            expect(invoice_1.total_discounted_revenue).to eq(33000)
+          end
+
+          it "each item meets criteria for the same discount" do
+            invoice_item_1 = InvoiceItem.create!(item: item_1, invoice: invoice_1, quantity: 20, unit_price: 1000, status: 0)  # 10% off
+            invoice_item_2 = InvoiceItem.create!(item: item_2, invoice: invoice_1, quantity: 20, unit_price: 1000, status: 0) # 10% off
+
+            expect(invoice_1.total_discounted_revenue).to eq(36000)
+          end
+
+          it "multiple merchants' items on an invoice - no qualifying discount" do
+            invoice_item_1 = InvoiceItem.create!(item: item_1, invoice: invoice_1, quantity: 10, unit_price: 1000, status: 0) # merchant 1 item, no discount
+            invoice_item_1 = InvoiceItem.create!(item: item_4, invoice: invoice_1, quantity: 10, unit_price: 1000, status: 0) # merchant 2 item, no discount
+
+            expect(invoice_1.total_discounted_revenue).to eq(20000)
+          end
+
+          it "multiple merchants' items on an invoice - 1 qualifies for discount" do
+            invoice_item_1 = InvoiceItem.create!(item: item_1, invoice: invoice_1, quantity: 15, unit_price: 1000, status: 0) # merchant 1 item, no discount
+            invoice_item_1 = InvoiceItem.create!(item: item_4, invoice: invoice_1, quantity: 15, unit_price: 1000, status: 0) # merchant 2 item, 20% off
+
+            expect(invoice_1.total_discounted_revenue).to eq(27000)
+          end
+
+          it "multiple merchants' items on an invoice - both qualify for discount" do
+            invoice_item_1 = InvoiceItem.create!(item: item_1, invoice: invoice_1, quantity: 20, unit_price: 1000, status: 0) # merchant 1 item, 10% off
+            invoice_item_1 = InvoiceItem.create!(item: item_4, invoice: invoice_1, quantity: 20, unit_price: 1000, status: 0) # merchant 2 item, 20% off
+
+            expect(invoice_1.total_discounted_revenue).to eq(34000)
+          end
+        end
       end
     end
   end
