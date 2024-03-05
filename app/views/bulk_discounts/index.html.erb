@@ -1,1 +1,5 @@
 <h1>Current Bulk Discounts</h1>
+
+<% @bulk_discounts.each do |discount| %>
+  <p>Discounts: <%= discount.percentage %> off of <%= discount.min_amount %> items</p>
+<% end %>
