@@ -31,8 +31,8 @@ RSpec.describe "Bulk discount index" do
     it "has a link to create new discount" do
       visit bulk_discounts_path
 
-      expect(page).to have_link("create new discount")
-      click_on "create new discount"
+      expect(page).to have_link("Create New Discount")
+      click_on "Create New Discount"
 
       expect(current_path).to eq(new_bulk_discount_path)
     end
