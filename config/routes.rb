@@ -6,7 +6,7 @@ Rails.application.routes.draw do
 
   get "/", to: "application#welcome"
 
-  resources :bulk_discounts, only: [:index]
+  resources :bulk_discounts, only: [:index, :show]
 
   resources :merchants, only: [] do
     resources :dashboard, module: "merchant", only: [:index]

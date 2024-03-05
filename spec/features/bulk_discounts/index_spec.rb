@@ -18,5 +18,10 @@ RSpec.describe "Bulk discount index" do
     expect(page).to have_content(@bulk_discount_2.min_amount)
   end
 
-  
+  it "links to bulk discounts show page" do
+    visit bulk_discounts_path
+
+    expect(page).to have_link("Percentage Discount")
+    expect(page).to have_link("Quantity Threshold")
+  end
 end
