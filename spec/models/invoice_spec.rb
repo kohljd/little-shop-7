@@ -78,7 +78,7 @@ RSpec.describe Invoice, type: :model do
       end
     end
 
-    describe "#total_revenue" do
+    describe "#total_invoice_revenue" do
       describe "calculates an invoice's total revenue" do
         describe "scenarios:" do
           it "varying invoice_item statuses, 1 merchant" do
@@ -98,8 +98,27 @@ RSpec.describe Invoice, type: :model do
         end
       end
     end
-
-    describe "#total_discounted_revenue" do
+    
+        describe "#total_revenue(merchant)" do
+          describe "merchant's total revenue for their items on an invoice" do
+            it "1 merchant on invoice" do
+              invoice_item_1 = InvoiceItem.create!(item: item_1, invoice: invoice_1, quantity: 2, unit_price: 1000, status: 0)
+              invoice_item_2 = InvoiceItem.create!(item: item_2, invoice: invoice_1, quantity: 2, unit_price: 1000, status: 0)
+    
+              expect(invoice_1.total_revenue(merchant_1)).to eq(4000)
+            end
+    
+            it "2 merchants' items on invoice" do
+              invoice_item_1 = InvoiceItem.create!(item: item_1, invoice: invoice_1, quantity: 2, unit_price: 1000, status: 0)
+              invoice_item_2 = InvoiceItem.create!(item: item_5, invoice: invoice_1, quantity: 2, unit_price: 1000, status: 0)
+    
+              expect(invoice_1.total_revenue(merchant_1)).to eq(4000)
+              expect(invoice_2.total_revenue(merchant_2)).to eq(4000)
+            end
+          end
+        end
+    
+    describe "#total_discounted_revenue(merchant)" do
       describe "it calculates an invoice's total discounted revenue" do
         describe "scenarios:" do
           let!(:bulk_discount_1) {merchant_1.bulk_discounts.create!(discount: 10, quantity: 20)}
@@ -111,56 +130,59 @@ RSpec.describe Invoice, type: :model do
             invoice_item_1 = InvoiceItem.create!(item: item_1, invoice: invoice_1, quantity: 10, unit_price: 1000, status: 0)
             invoice_item_2 = InvoiceItem.create!(item: item_2, invoice: invoice_1, quantity: 10, unit_price: 1000, status: 0)
 
-            expect(invoice_1.total_discounted_revenue).to eq(20000)
+            expect(invoice_1.total_discounted_revenue(merchant_1)).to eq(20000)
           end
 
           it "1 item qualifies for a bulk discount" do
             invoice_item_1 = InvoiceItem.create!(item: item_1, invoice: invoice_1, quantity: 20, unit_price: 1000, status: 0)  # 10% off
             invoice_item_2 = InvoiceItem.create!(item: item_2, invoice: invoice_1, quantity: 10, unit_price: 1000, status: 0)
 
-            expect(invoice_1.total_discounted_revenue).to eq(28000)
+            expect(invoice_1.total_discounted_revenue(merchant_1)).to eq(28000)
           end
 
           it "applies the better of merchant's two discounts - 1 item meets 2 discounts' criteria" do
             invoice_item_1 = InvoiceItem.create!(item: item_1, invoice: invoice_1, quantity: 30, unit_price: 1000, status: 0) # meet 10% & 50% off
             invoice_item_2 = InvoiceItem.create!(item: item_2, invoice: invoice_1, quantity: 10, unit_price: 1000, status: 0)
 
-            expect(invoice_1.total_discounted_revenue).to eq(25000)
+            expect(invoice_1.total_discounted_revenue(merchant_1)).to eq(25000)
           end
 
           it "each item meets criteria for separate discounts" do
             invoice_item_1 = InvoiceItem.create!(item: item_1, invoice: invoice_1, quantity: 30, unit_price: 1000, status: 0)  # 50% off
             invoice_item_2 = InvoiceItem.create!(item: item_2, invoice: invoice_1, quantity: 20, unit_price: 1000, status: 0) # 10% off
 
-            expect(invoice_1.total_discounted_revenue).to eq(33000)
+            expect(invoice_1.total_discounted_revenue(merchant_1)).to eq(33000)
           end
 
           it "each item meets criteria for the same discount" do
             invoice_item_1 = InvoiceItem.create!(item: item_1, invoice: invoice_1, quantity: 20, unit_price: 1000, status: 0)  # 10% off
             invoice_item_2 = InvoiceItem.create!(item: item_2, invoice: invoice_1, quantity: 20, unit_price: 1000, status: 0) # 10% off
 
-            expect(invoice_1.total_discounted_revenue).to eq(36000)
+            expect(invoice_1.total_discounted_revenue(merchant_1)).to eq(36000)
           end
 
           it "multiple merchants' items on an invoice - no qualifying discount" do
             invoice_item_1 = InvoiceItem.create!(item: item_1, invoice: invoice_1, quantity: 10, unit_price: 1000, status: 0) # merchant 1 item, no discount
-            invoice_item_1 = InvoiceItem.create!(item: item_4, invoice: invoice_1, quantity: 10, unit_price: 1000, status: 0) # merchant 2 item, no discount
+            invoice_item_2 = InvoiceItem.create!(item: item_4, invoice: invoice_1, quantity: 10, unit_price: 1000, status: 0) # merchant 2 item, no discount
 
-            expect(invoice_1.total_discounted_revenue).to eq(20000)
+            expect(invoice_1.total_discounted_revenue(merchant_1)).to eq(10000)
+            expect(invoice_1.total_discounted_revenue(merchant_2)).to eq(10000)
           end
 
           it "multiple merchants' items on an invoice - 1 qualifies for discount" do
             invoice_item_1 = InvoiceItem.create!(item: item_1, invoice: invoice_1, quantity: 15, unit_price: 1000, status: 0) # merchant 1 item, no discount
-            invoice_item_1 = InvoiceItem.create!(item: item_4, invoice: invoice_1, quantity: 15, unit_price: 1000, status: 0) # merchant 2 item, 20% off
+            invoice_item_2 = InvoiceItem.create!(item: item_4, invoice: invoice_1, quantity: 15, unit_price: 1000, status: 0) # merchant 2 item, 20% off
 
-            expect(invoice_1.total_discounted_revenue).to eq(27000)
+            expect(invoice_1.total_discounted_revenue(merchant_1)).to eq(15000)
+            expect(invoice_1.total_discounted_revenue(merchant_2)).to eq(12000)
           end
 
           it "multiple merchants' items on an invoice - both qualify for discount" do
             invoice_item_1 = InvoiceItem.create!(item: item_1, invoice: invoice_1, quantity: 20, unit_price: 1000, status: 0) # merchant 1 item, 10% off
-            invoice_item_1 = InvoiceItem.create!(item: item_4, invoice: invoice_1, quantity: 20, unit_price: 1000, status: 0) # merchant 2 item, 20% off
+            invoice_item_2 = InvoiceItem.create!(item: item_4, invoice: invoice_1, quantity: 20, unit_price: 1000, status: 0) # merchant 2 item, 20% off
 
-            expect(invoice_1.total_discounted_revenue).to eq(34000)
+            expect(invoice_1.total_discounted_revenue(merchant_1)).to eq(18000)
+            expect(invoice_1.total_discounted_revenue(merchant_2)).to eq(16000)
           end
         end
       end
