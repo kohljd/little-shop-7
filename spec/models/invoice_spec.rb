@@ -86,14 +86,14 @@ RSpec.describe Invoice, type: :model do
             invoice_item_2 = InvoiceItem.create!(item: item_2, invoice: invoice_1, quantity: 2, unit_price: 1000, status: 1)
             invoice_item_3 = InvoiceItem.create!(item: item_3, invoice: invoice_1, quantity: 3, unit_price: 5000, status: 2)
 
-            expect(invoice_1.total_revenue).to eq(19500)
+            expect(invoice_1.total_invoice_revenue).to eq(19500)
           end
 
           it "2 merchants' items on invoice" do
             invoice_item_1 = InvoiceItem.create!(item: item_1, invoice: invoice_1, quantity: 1, unit_price: 2500, status: 0)
             invoice_item_2 = InvoiceItem.create!(item: item_5, invoice: invoice_1, quantity: 2, unit_price: 1000, status: 1)
 
-            expect(invoice_1.total_revenue).to eq(4500)
+            expect(invoice_1.total_invoice_revenue).to eq(4500)
           end
         end
       end
@@ -112,8 +112,8 @@ RSpec.describe Invoice, type: :model do
               invoice_item_1 = InvoiceItem.create!(item: item_1, invoice: invoice_1, quantity: 2, unit_price: 1000, status: 0)
               invoice_item_2 = InvoiceItem.create!(item: item_5, invoice: invoice_1, quantity: 2, unit_price: 1000, status: 0)
     
-              expect(invoice_1.total_revenue(merchant_1)).to eq(4000)
-              expect(invoice_2.total_revenue(merchant_2)).to eq(4000)
+              expect(invoice_1.total_revenue(merchant_1)).to eq(2000)
+              expect(invoice_1.total_revenue(merchant_2)).to eq(2000)
             end
           end
         end
