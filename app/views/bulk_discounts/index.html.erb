@@ -3,3 +3,5 @@
 <% @bulk_discounts.each do |discount| %>
   <p><%= link_to 'Percentage Discount:', bulk_discount_path(discount) %> <%= discount.percentage %> with a <%= link_to 'Quantity Threshold', bulk_discount_path(discount) %> of <%= discount.min_amount %> items</p>
 <% end %>
+
+<%= link_to 'create new discount', new_bulk_discount_path %>

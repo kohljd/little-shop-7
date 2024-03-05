@@ -8,20 +8,33 @@ RSpec.describe "Bulk discount index" do
     @bulk_discount_2 = @merchant_1.bulk_discounts.create!(percentage: "25%", min_amount: 15)
   end
 
-  it "see all of my bulk discounts including their attributes" do
-    visit bulk_discounts_path
-    
-    expect(page).to have_content(@bulk_discount_1.percentage)
-    expect(page).to have_content(@bulk_discount_2.percentage)
-    
-    expect(page).to have_content(@bulk_discount_1.min_amount)
-    expect(page).to have_content(@bulk_discount_2.min_amount)
+  describe "User Story 1" do
+    it "see all of my bulk discounts including their attributes" do
+      visit bulk_discounts_path
+      
+      expect(page).to have_content(@bulk_discount_1.percentage)
+      expect(page).to have_content(@bulk_discount_2.percentage)
+      
+      expect(page).to have_content(@bulk_discount_1.min_amount)
+      expect(page).to have_content(@bulk_discount_2.min_amount)
+    end
+
+    it "links to bulk discounts show page" do
+      visit bulk_discounts_path
+
+      expect(page).to have_link("Percentage Discount")
+      expect(page).to have_link("Quantity Threshold")
+    end
   end
 
-  it "links to bulk discounts show page" do
-    visit bulk_discounts_path
+  describe "User story 2" do
+    it "has a link to create new discount" do
+      visit bulk_discounts_path
 
-    expect(page).to have_link("Percentage Discount")
-    expect(page).to have_link("Quantity Threshold")
+      expect(page).to have_link("create new discount")
+      click_on "create new discount"
+
+      expect(current_path).to eq(new_bulk_discount_path)
+    end
   end
 end
