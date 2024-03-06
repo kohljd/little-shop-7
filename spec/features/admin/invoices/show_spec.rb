@@ -64,11 +64,12 @@ RSpec.describe "Admin Invoices Show", type: :feature do
         end
       end
 
-      describe "User Story 35 - Invoice's Total Revenue" do
-        it "displays total revenue to be made from this invoice" do
-          expect(page).to have_content("Total Revenue: $195.00")
-        end
-      end
+      #skipped - method updated and tested w/final project tests
+      # describe "User Story 35 - Invoice's Total Revenue" do
+      #   xit "displays total revenue to be made from this invoice" do
+      #     expect(page).to have_content("Total Revenue: $195.00")
+      #   end
+      # end
 
       describe "User Story 36 - Update Invoice Status" do
         it "displays current status in a 'select' field" do
@@ -87,32 +88,37 @@ RSpec.describe "Admin Invoices Show", type: :feature do
     end
 
     describe "total and discounted revenue" do
-      let(:merchant_1) {create(:merchant)}
-      let(:merchant_2) {create(:merchant)}
+      let!(:merchant_3) {create(:merchant)}
+      let!(:merchant_4) {create(:merchant)}
   
-      let(:item_1) {create(:item, merchant: merchant_1)}
-      let(:item_2) {create(:item, merchant: merchant_1)}
-      let(:item_3) {create(:item, merchant: merchant_1)}
-      let(:item_4) {create(:item, merchant: merchant_2)}
-      let(:item_5) {create(:item, merchant: merchant_2)}
+      let!(:item_4) {create(:item, merchant: merchant_3)}
+      let!(:item_5) {create(:item, merchant: merchant_3)}
+      let!(:item_6) {create(:item, merchant: merchant_3)}
+      let!(:item_7) {create(:item, merchant: merchant_4)}
+      let!(:item_8) {create(:item, merchant: merchant_4)}
 
-      let(:invoice_1) {create(:invoice)}
-      let(:invoice_item_1) {InvoiceItem.create!(item: item_1, invoice: invoice_1, quantity: 20, unit_price: 1000, status: 0)} # merchant 1 item, 10% off
-      let(:invoice_item_2) {InvoiceItem.create!(item: item_4, invoice: invoice_1, quantity: 20, unit_price: 1000, status: 0)} # merchant 2 item, 20% off
+      let!(:invoice_3) {create(:invoice)}
+      let!(:invoice_item_1) {InvoiceItem.create!(item: item_4, invoice: invoice_3, quantity: 20, unit_price: 1000, status: 0)} # merchant 1 item, 10% off
+      let!(:invoice_item_2) {InvoiceItem.create!(item: item_7, invoice: invoice_3, quantity: 20, unit_price: 1000, status: 0)} # merchant 2 item, 20% off
+      
+      let!(:bulk_discount_1) {merchant_3.bulk_discounts.create!(discount: 10, quantity: 20)}
+      let!(:bulk_discount_2) {merchant_3.bulk_discounts.create!(discount: 50, quantity: 30)}
+      let!(:bulk_discount_3) {merchant_4.bulk_discounts.create!(discount: 20, quantity: 15)}
+      let!(:bulk_discount_4) {merchant_4.bulk_discounts.create!(discount: 15, quantity: 15)}
 
       it "displays total revenue without discounts" do
-        visit admin_invoice_path(invoice_1)
+        visit admin_invoice_path(invoice_3)
         expect(page).to have_content("Subtotal: 40000")
       end
 
       it "displays total of discounts applied" do
-        visit admin_invoice_path(invoice_1)
-        expect(page).to have_content("Total Discounts: 40000")
+        visit admin_invoice_path(invoice_3)
+        expect(page).to have_content("Total Discounts: 6000")
       end
 
       it "discplays total revenue after discounts applied" do
-        visit admin_invoice_path(invoice_1)
-        expect(page).to have_content("Total Revenue: 40000")
+        visit admin_invoice_path(invoice_3)
+        expect(page).to have_content("Total Revenue: 34000")
       end
     end
   end
