@@ -59,6 +59,10 @@ class Invoice < ApplicationRecord
     total_revenue - entire_invoice_discount_info.map {|invoice_item| invoice_item.amount_customer_saved}.sum
   end
 
+  def customer_saved
+    entire_invoice_discount_info.map {|invoice_item| invoice_item.amount_customer_saved}.sum
+  end
+
   def discount_info(merchant)
     InvoiceItem.find_by_sql(
       "SELECT SUM(invoice_items.quantity * invoice_items.unit_price) AS undiscounted_revenue,
