@@ -29,19 +29,19 @@ class Invoice < ApplicationRecord
       .sum("invoice_items.quantity * invoice_items.unit_price")
   end
 
-  def total_discounted_revenue(invoice, merchant)
+  def discount_info(merchant)
     InvoiceItem.find_by_sql(
-      "SELECT SUM(invoice_items.quantity * invoice_items.unit_price) AS undiscounted_total_revenue,
-        CAST(SUM((1 - ((bulk_discounts.discount + 0.0) / 100)) * (invoice_items.quantity * invoice_items.unit_price)) AS INTEGER) AS discounted_total_revenue,
+      "SELECT SUM(invoice_items.quantity * invoice_items.unit_price) AS undiscounted_revenue,
+        CAST(SUM((1 - ((bulk_discounts.discount + 0.0) / 100)) * (invoice_items.quantity * invoice_items.unit_price)) AS INTEGER) AS discounted_revenue,
         CAST(SUM(((bulk_discounts.discount + 0.0)/100) * invoice_items.quantity * invoice_items.unit_price) AS INTEGER) AS amount_customer_saved,
-        bulk_discounts.id AS discount_applied
+        bulk_discounts.*
 
       FROM invoice_items
       JOIN items ON items.id = invoice_items.item_id
       JOIN merchants ON merchants.id = items.merchant_id
       JOIN bulk_discounts ON bulk_discounts.merchant_id = merchants.id
 
-      WHERE invoice_items.invoice_id = #{invoice.id}
+      WHERE invoice_items.invoice_id = #{self.id}
       AND items.merchant_id = #{merchant.id}
       AND bulk_discounts.merchant_id = #{merchant.id}
       AND invoice_items.quantity >= bulk_discounts.quantity
@@ -55,4 +55,12 @@ class Invoice < ApplicationRecord
       GROUP BY invoice_items.item_id, bulk_discounts.id"
     )
   end
+
+  def total_discounted_revenue(merchant)
+    total_invoice_revenue(merchant) - discount_info(merchant).map {|invoice_item| invoice_item.amount_customer_saved}.sum
+  end
+
+  # def applied_bulk_discounts(merchant)
+  #   discount_info(merchant).bulk_discounts
+  # end
 end
