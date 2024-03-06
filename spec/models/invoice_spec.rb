@@ -99,7 +99,7 @@ RSpec.describe Invoice, type: :model do
       end
     end
     
-        describe "#total_revenue(merchant)" do
+        describe "#total_invoice_revenue(merchant)" do
           describe "merchant's total revenue for their items on an invoice" do
             it "1 merchant on invoice" do
               invoice_item_1 = InvoiceItem.create!(item: item_1, invoice: invoice_1, quantity: 2, unit_price: 1000, status: 0)
