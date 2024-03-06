@@ -98,6 +98,70 @@ RSpec.describe Invoice, type: :model do
         end
       end
     end
+
+    describe "#total_invoice_discounted_revenue" do
+      describe "total revenue after discounts applied" do
+        describe "scenarios:" do
+          let!(:bulk_discount_1) {merchant_1.bulk_discounts.create!(discount: 10, quantity: 20)}
+          let!(:bulk_discount_2) {merchant_1.bulk_discounts.create!(discount: 50, quantity: 30)}
+          let!(:bulk_discount_3) {merchant_2.bulk_discounts.create!(discount: 20, quantity: 15)}
+          let!(:bulk_discount_4) {merchant_2.bulk_discounts.create!(discount: 15, quantity: 15)}
+
+          it "no applied discount" do
+            invoice_item_1 = InvoiceItem.create!(item: item_1, invoice: invoice_1, quantity: 10, unit_price: 1000, status: 0) # merchant 1 item, no discount
+            invoice_item_2 = InvoiceItem.create!(item: item_4, invoice: invoice_1, quantity: 10, unit_price: 1000, status: 0) # merchant 2 item, no discount
+
+            expect(invoice_1.total_invoice_discounted_revenue).to eq(20000)
+          end
+
+          it "1 applied discount" do
+            invoice_item_1 = InvoiceItem.create!(item: item_1, invoice: invoice_1, quantity: 15, unit_price: 1000, status: 0) # merchant 1 item, no discount
+            invoice_item_2 = InvoiceItem.create!(item: item_4, invoice: invoice_1, quantity: 15, unit_price: 1000, status: 0) # merchant 2 item, 20% off
+
+            expect(invoice_1.total_invoice_discounted_revenue).to eq(27000)
+          end
+
+          it "multiple applied discounts" do
+            invoice_item_1 = InvoiceItem.create!(item: item_1, invoice: invoice_1, quantity: 20, unit_price: 1000, status: 0) # merchant 1 item, 10% off
+            invoice_item_2 = InvoiceItem.create!(item: item_4, invoice: invoice_1, quantity: 20, unit_price: 1000, status: 0) # merchant 2 item, 20% off
+
+            expect(invoice_1.total_invoice_discounted_revenue).to eq(34000)
+          end
+        end
+      end
+    end
+
+    describe "#customer_saved" do
+      describe "total amount saved by customer using bulk discounts" do
+        describe "scenarios:" do
+          let!(:bulk_discount_1) {merchant_1.bulk_discounts.create!(discount: 10, quantity: 20)}
+          let!(:bulk_discount_2) {merchant_1.bulk_discounts.create!(discount: 50, quantity: 30)}
+          let!(:bulk_discount_3) {merchant_2.bulk_discounts.create!(discount: 20, quantity: 15)}
+          let!(:bulk_discount_4) {merchant_2.bulk_discounts.create!(discount: 15, quantity: 15)}
+
+          it "no applied discount" do
+            invoice_item_1 = InvoiceItem.create!(item: item_1, invoice: invoice_1, quantity: 10, unit_price: 1000, status: 0) # merchant 1 item, no discount
+            invoice_item_2 = InvoiceItem.create!(item: item_4, invoice: invoice_1, quantity: 10, unit_price: 1000, status: 0) # merchant 2 item, no discount
+
+            expect(invoice_1.customer_saved).to eq(0)
+          end
+
+          it "1 applied discount" do
+            invoice_item_1 = InvoiceItem.create!(item: item_1, invoice: invoice_1, quantity: 15, unit_price: 1000, status: 0) # merchant 1 item, no discount
+            invoice_item_2 = InvoiceItem.create!(item: item_4, invoice: invoice_1, quantity: 15, unit_price: 1000, status: 0) # merchant 2 item, 20% off
+
+            expect(invoice_1.customer_saved).to eq(3000)
+          end
+
+          it "multiple applied discounts" do
+            invoice_item_1 = InvoiceItem.create!(item: item_1, invoice: invoice_1, quantity: 20, unit_price: 1000, status: 0) # merchant 1 item, 10% off
+            invoice_item_2 = InvoiceItem.create!(item: item_4, invoice: invoice_1, quantity: 20, unit_price: 1000, status: 0) # merchant 2 item, 20% off
+
+            expect(invoice_1.customer_saved).to eq(6000)
+          end
+        end
+      end
+    end
     
     describe "#total_invoice_revenue(merchant)" do
       describe "merchant's total revenue for their items on an invoice" do

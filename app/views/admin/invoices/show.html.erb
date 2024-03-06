@@ -7,7 +7,9 @@
 <% end %>
 
 <p>Created on: <%= @invoice.format_date_created %></p>
-<p>Total Revenue: <%= @invoice.format_total_revenue %></p>
+<p>Subtotal: <%= @invoice.total_revenue %></p>
+<p>Total Discounts: <%= @invoice.customer_saved %></p>
+<p>Total Revenue: <%= @invoice.total_invoice_discounted_revenue %></p>
 
 <h3>Customer: <%= @invoice.customer.full_name%> </h3>
 
