@@ -147,6 +147,10 @@ RSpec.describe 'Merchant Invoices Show Page', type: :feature do
           expect(page).to have_content("Discounted Revenue: 28000")
         end
       end
+
+      it "displays link to applied discount's show page" do
+        
+      end
     end
   end
 end

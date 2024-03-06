@@ -99,24 +99,24 @@ RSpec.describe Invoice, type: :model do
       end
     end
     
-        describe "#total_invoice_revenue(merchant)" do
-          describe "merchant's total revenue for their items on an invoice" do
-            it "1 merchant on invoice" do
-              invoice_item_1 = InvoiceItem.create!(item: item_1, invoice: invoice_1, quantity: 2, unit_price: 1000, status: 0)
-              invoice_item_2 = InvoiceItem.create!(item: item_2, invoice: invoice_1, quantity: 2, unit_price: 1000, status: 0)
-    
-              expect(invoice_1.total_invoice_revenue(merchant_1)).to eq(4000)
-            end
-    
-            it "2 merchants' items on invoice" do
-              invoice_item_1 = InvoiceItem.create!(item: item_1, invoice: invoice_1, quantity: 2, unit_price: 1000, status: 0)
-              invoice_item_2 = InvoiceItem.create!(item: item_5, invoice: invoice_1, quantity: 2, unit_price: 1000, status: 0)
-    
-              expect(invoice_1.total_invoice_revenue(merchant_1)).to eq(2000)
-              expect(invoice_1.total_invoice_revenue(merchant_2)).to eq(2000)
-            end
-          end
+    describe "#total_invoice_revenue(merchant)" do
+      describe "merchant's total revenue for their items on an invoice" do
+        it "1 merchant on invoice" do
+          invoice_item_1 = InvoiceItem.create!(item: item_1, invoice: invoice_1, quantity: 2, unit_price: 1000, status: 0)
+          invoice_item_2 = InvoiceItem.create!(item: item_2, invoice: invoice_1, quantity: 2, unit_price: 1000, status: 0)
+
+          expect(invoice_1.total_invoice_revenue(merchant_1)).to eq(4000)
         end
+
+        it "2 merchants' items on invoice" do
+          invoice_item_1 = InvoiceItem.create!(item: item_1, invoice: invoice_1, quantity: 2, unit_price: 1000, status: 0)
+          invoice_item_2 = InvoiceItem.create!(item: item_5, invoice: invoice_1, quantity: 2, unit_price: 1000, status: 0)
+
+          expect(invoice_1.total_invoice_revenue(merchant_1)).to eq(2000)
+          expect(invoice_1.total_invoice_revenue(merchant_2)).to eq(2000)
+        end
+      end
+    end
     
     describe "#total_discounted_revenue(merchant)" do
       describe "it calculates an invoice's total discounted revenue" do
@@ -184,6 +184,34 @@ RSpec.describe Invoice, type: :model do
             expect(invoice_1.total_discounted_revenue(merchant_1)).to eq(18000)
             expect(invoice_1.total_discounted_revenue(merchant_2)).to eq(16000)
           end
+        end
+      end
+    end
+
+    describe "#applied_bulk_discounts(merchant)" do
+      let!(:bulk_discount_1) {merchant_1.bulk_discounts.create!(discount: 10, quantity: 20)}
+      let!(:bulk_discount_2) {merchant_1.bulk_discounts.create!(discount: 50, quantity: 30)}
+
+      describe "lists which of the merchant's discounts were applied to an invoice (if any)" do
+        it "single applied bulk discount" do
+          invoice_item_1 = InvoiceItem.create!(item: item_1, invoice: invoice_1, quantity: 20, unit_price: 1000, status: 0)  # 10% off
+          invoice_item_2 = InvoiceItem.create!(item: item_2, invoice: invoice_1, quantity: 10, unit_price: 1000, status: 0)
+          
+          expect(invoice_1.applied_bulk_discounts(merchant_1)).to eq([bulk_discount_1.id])
+        end
+
+        it "bulk discount can't be listed twice" do
+          invoice_item_1 = InvoiceItem.create!(item: item_1, invoice: invoice_1, quantity: 20, unit_price: 1000, status: 0)  # 10% off
+          invoice_item_2 = InvoiceItem.create!(item: item_2, invoice: invoice_1, quantity: 20, unit_price: 1000, status: 0) # 10% off
+
+          expect(invoice_1.applied_bulk_discounts(merchant_1)).to eq([bulk_discount_1.id])
+        end
+
+        it "multiple bulk discounts" do
+          invoice_item_1 = InvoiceItem.create!(item: item_1, invoice: invoice_1, quantity: 30, unit_price: 1000, status: 0)  # 50% off
+          invoice_item_2 = InvoiceItem.create!(item: item_2, invoice: invoice_1, quantity: 20, unit_price: 1000, status: 0) # 10% off
+
+          expect(invoice_1.applied_bulk_discounts(merchant_1)).to eq([bulk_discount_2.id, bulk_discount_1.id])
         end
       end
     end
