@@ -22,4 +22,45 @@ class Invoice < ApplicationRecord
   def total_revenue
     invoice_items.sum("invoice_items.quantity * invoice_items.unit_price")
   end
+
+  def total_invoice_revenue(merchant)
+    invoice_items.joins(:item)
+      .where("items.merchant_id = #{merchant.id}")
+      .sum("invoice_items.quantity * invoice_items.unit_price")
+  end
+
+  def discount_info(merchant)
+    InvoiceItem.find_by_sql(
+      "SELECT SUM(invoice_items.quantity * invoice_items.unit_price) AS undiscounted_revenue,
+        CAST(SUM((1 - ((bulk_discounts.discount + 0.0) / 100)) * (invoice_items.quantity * invoice_items.unit_price)) AS INTEGER) AS discounted_revenue,
+        CAST(SUM(((bulk_discounts.discount + 0.0)/100) * invoice_items.quantity * invoice_items.unit_price) AS INTEGER) AS amount_customer_saved,
+        bulk_discounts.*
+
+      FROM invoice_items
+      JOIN items ON items.id = invoice_items.item_id
+      JOIN merchants ON merchants.id = items.merchant_id
+      JOIN bulk_discounts ON bulk_discounts.merchant_id = merchants.id
+
+      WHERE invoice_items.invoice_id = #{self.id}
+      AND items.merchant_id = #{merchant.id}
+      AND bulk_discounts.merchant_id = #{merchant.id}
+      AND invoice_items.quantity >= bulk_discounts.quantity
+      AND bulk_discounts.discount = (
+        SELECT MAX(discount) FROM bulk_discounts as inner_discounts
+        WHERE invoice_items.quantity >= inner_discounts.quantity
+        AND bulk_discounts.merchant_id = inner_discounts.merchant_id
+        GROUP BY inner_discounts.discount
+        ORDER BY inner_discounts.discount DESC LIMIT 1
+      )
+      GROUP BY invoice_items.item_id, bulk_discounts.id"
+    )
+  end
+
+  def total_discounted_revenue(merchant)
+    total_invoice_revenue(merchant) - discount_info(merchant).map {|invoice_item| invoice_item.amount_customer_saved}.sum
+  end
+
+  # def applied_bulk_discounts(merchant)
+  #   discount_info(merchant).bulk_discounts
+  # end
 end

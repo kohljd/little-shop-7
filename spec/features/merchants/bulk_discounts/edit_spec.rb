@@ -55,5 +55,13 @@ RSpec.describe "Merchant Bulk Discount Edit", type: :feature do
       expect(page).to have_content("Discount must be greater than 0")
       expect(page).to have_content("Quantity must be greater than 0")
     end
+
+    it "disount must be less than or equal to 100" do
+      fill_in "Discount", with: 101
+      click_on "Submit"
+
+      expect(current_path).to eq(edit_merchant_bulk_discount_path(merchant_1, bulk_discount_1))
+      expect(page).to have_content("Discount must be less than or equal to 100")
+    end
   end
 end
