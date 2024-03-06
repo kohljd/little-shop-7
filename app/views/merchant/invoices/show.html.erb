@@ -1,9 +1,15 @@
 <h1>Invoice #<%= @invoice.id %></h1>
 <p>Status: <%= @invoice.status %></p>
 <p>Created on: <%= @invoice.format_date_created %></p>
+<h2>Customer: <%= @invoice.customer.full_name  %></h2>
+
 <p>Total Revenue: <%= @invoice.total_invoice_revenue(@merchant) %></p>
 <p>Discounted Revenue: <%= @invoice.total_discounted_revenue(@merchant) %></p>
-<h2>Customer: <%= @invoice.customer.full_name  %></h2>
+<h3> Discounts Applied </h3>
+<% @invoice.applied_bulk_discounts(@merchant).each do |discount| %>
+  <p><%= link_to "Bulk Discount #{discount}", "/merchants/#{@merchant.id}/bulk_discounts/#{discount}" %></p>
+<% end %>
+
 <h3>Items on this Invoice:</h3>
 <table>
   <tr>

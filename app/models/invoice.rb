@@ -34,7 +34,7 @@ class Invoice < ApplicationRecord
       "SELECT SUM(invoice_items.quantity * invoice_items.unit_price) AS undiscounted_revenue,
         CAST(SUM((1 - ((bulk_discounts.discount + 0.0) / 100)) * (invoice_items.quantity * invoice_items.unit_price)) AS INTEGER) AS discounted_revenue,
         CAST(SUM(((bulk_discounts.discount + 0.0)/100) * invoice_items.quantity * invoice_items.unit_price) AS INTEGER) AS amount_customer_saved,
-        bulk_discounts.*
+        bulk_discounts.id AS applied_discount
 
       FROM invoice_items
       JOIN items ON items.id = invoice_items.item_id
@@ -60,7 +60,7 @@ class Invoice < ApplicationRecord
     total_invoice_revenue(merchant) - discount_info(merchant).map {|invoice_item| invoice_item.amount_customer_saved}.sum
   end
 
-  # def applied_bulk_discounts(merchant)
-  #   discount_info(merchant).bulk_discounts
-  # end
+  def applied_bulk_discounts(merchant)
+    discount_info(merchant).map {|invoice_item| invoice_item.applied_discount}.uniq
+  end
 end
