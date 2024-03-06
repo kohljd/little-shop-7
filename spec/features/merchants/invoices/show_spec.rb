@@ -149,7 +149,22 @@ RSpec.describe 'Merchant Invoices Show Page', type: :feature do
       end
 
       it "displays link to applied discount's show page" do
-        
+        bulk_discount_1 = merchant_1.bulk_discounts.create!(discount: 10, quantity: 20)
+        bulk_discount_2 = merchant_1.bulk_discounts.create!(discount: 50, quantity: 30)
+
+        within "#bulk_discount_applied-#{bulk_discount_1.id}" do
+          expect(page).to have_link("Bulk Discount #{bulk_discount_1.id}")
+          click_on "Bulk Discount #{bulk_discount_1.id}"
+          expect(current_path).to eq(merchant_bulk_discount_path(merchant_1, bulk_discount_1))
+        end
+
+        visit merchant_bulk_discounts_path(merchant_1)
+
+        within "#bulk_discount_applied-#{bulk_discount_2.id}" do
+          expect(page).to have_link("Bulk Discount #{bulk_discount_2.id}")
+          click_on "Bulk Discount #{bulk_discount_2.id}"
+          expect(current_path).to eq(merchant_bulk_discount_path(merchant_1, bulk_discount_2))
+        end
       end
     end
   end
