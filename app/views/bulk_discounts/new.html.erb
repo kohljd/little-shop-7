@@ -1,2 +1,11 @@
 <h1>New Discount Form</h1>
 
+<%= form_with url: bulk_discounts_path, method: :get, data: { turbo: false } do |form| %>
+  <%= form.label :percentage, "Percentage: " %>
+  <%= form.text_field :percentage %>
+  
+  <%= form.label :min_amount, "Minimum Amount: " %>
+  <%= form.number_field :min_amount %>
+
+  <%= form.submit "Submit" %>
+<% end %>
