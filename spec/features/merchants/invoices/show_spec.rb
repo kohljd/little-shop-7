@@ -148,19 +148,26 @@ RSpec.describe 'Merchant Invoices Show Page', type: :feature do
         end
       end
 
-      it "displays link to applied discount's show page" do
-        bulk_discount_1 = merchant_1.bulk_discounts.create!(discount: 10, quantity: 20)
-        bulk_discount_2 = merchant_1.bulk_discounts.create!(discount: 50, quantity: 30)
+      describe "links" do
+        let(:merchant_1) {create(:merchant)}
+        let(:item_1) {create(:item, merchant: merchant_1)}
+        let(:item_2) {create(:item, merchant: merchant_1)}
+        let(:invoice_1) {create(:invoice)}
+        let!(:bulk_discount_1) {merchant_1.bulk_discounts.create!(discount: 10, quantity: 20)}
+        let!(:bulk_discount_2) {merchant_1.bulk_discounts.create!(discount: 50, quantity: 30)}
 
-        within "#bulk_discount_applied-#{bulk_discount_1.id}" do
+        it "applied discounts' show page" do
+          invoice_item_1 = InvoiceItem.create!(item: item_1, invoice: invoice_1, quantity: 30, unit_price: 1000, status: 0)  # 50% off
+          invoice_item_2 = InvoiceItem.create!(item: item_2, invoice: invoice_1, quantity: 20, unit_price: 1000, status: 0) # 10% off
+
+          visit merchant_bulk_discounts_path(merchant_1)
+
           expect(page).to have_link("Bulk Discount #{bulk_discount_1.id}")
           click_on "Bulk Discount #{bulk_discount_1.id}"
           expect(current_path).to eq(merchant_bulk_discount_path(merchant_1, bulk_discount_1))
-        end
 
-        visit merchant_bulk_discounts_path(merchant_1)
+          visit merchant_bulk_discounts_path(merchant_1)
 
-        within "#bulk_discount_applied-#{bulk_discount_2.id}" do
           expect(page).to have_link("Bulk Discount #{bulk_discount_2.id}")
           click_on "Bulk Discount #{bulk_discount_2.id}"
           expect(current_path).to eq(merchant_bulk_discount_path(merchant_1, bulk_discount_2))
